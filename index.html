@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Savanna static pages</title>
+    <link rel="stylesheet" href="assets/css/application_alx.css" media="all" />
+    <link rel="stylesheet" href="assets/css/app.css" media="all" />
+    <link rel="stylesheet" href="assets/css/accessibility-chat.css" media="all" />
+    <style>
+      body {
+        padding: 2rem 1rem;
+      }
+
+      .page-card {
+        max-width: 46rem;
+      }
+
+      .page-language-tools {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+      }
+
+      .page-language-tools select {
+        max-width: 10rem;
+      }
+
+      #google_translate_element {
+        position: absolute;
+        left: -10000px;
+        top: auto;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+      }
+
+      @media (max-width: 575.98px) {
+        .page-language-tools select {
+          max-width: 7rem;
+        }
+      }
+    </style>
+  </head>
+  <body class="bg-body-tertiary">
+    <main class="container-lg">
+      <div class="page-language-tools">
+        <label class="visually-hidden" for="page-language">Page language</label>
+        <select class="form-select form-select-sm" id="page-language" aria-label="Translate the full page" disabled>
+          <option value="en">English</option>
+          <option value="am">አማርኛ</option>
+          <option value="om">Afaan Oromoo</option>
+          <option value="ti">ትግርኛ</option>
+          <option value="so">Soomaali</option>
+          <option value="ar">العربية</option>
+        </select>
+        <span id="translation-status" class="small text-danger" role="status" aria-live="polite"></span>
+      </div>
+      <h1 class="mb-1">Savanna static pages</h1>
+      <p class="text-body-secondary mb-4">
+        Three learner pages frozen from the local dev app, for front-end and accessibility work.
+        They run without an application backend; page translation uses Google Translate and requires
+        an internet connection. The hamburger, the week strip, the score details and programme modals,
+        the module switcher and the courses dropdown still work. Frozen dashboard links remain inert;
+        page navigation and assistant Telegram links work, and global search is removed. The assistant
+        prototype cites matching text from the current page. Accessibility settings include opt-in
+        hover-to-read and selected-text reading, using voices already available on the device or browser.
+        Cloud speech needs a deployed Google Cloud endpoint and is not connected yet. Hosted AI, SMS,
+        live screen sharing and shared teacher analytics are not connected.
+      </p>
+
+      <div class="vstack gap-3 page-card">
+        <div class="card">
+          <div class="card-body">
+            <h2 class="h5 card-title"><a href="pages/homepage-v1-paced.html">Learner homepage — v1 paced</a></h2>
+            <p class="card-text mb-0">
+              Björn Sibanda, week 10 of <strong>WR 100: Fundamentals of Effective Communication</strong>
+              (cohort F26-SEM-16W, 31&nbsp;Aug – 20&nbsp;Dec 2026). Courses dropdown, a week strip with all
+              16 weeks preloaded, “continue where you left off”, immediate deliverables, period
+              progress, overall score and upcoming events.
+            </p>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-body">
+            <h2 class="h5 card-title"><a href="pages/homepage-v1-self-paced.html">Learner homepage — v1 self-paced</a></h2>
+            <p class="card-text mb-0">
+              Amara Nwosu, module 1 of 3 complete on <strong>VA-1: VA Foundations &amp; Professional Identity</strong>.
+              Course-progression gauge against the 70% graduation threshold, a working module
+              switcher, the programme modal preloaded, pacing boost and upcoming events.
+            </p>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-body">
+            <h2 class="h5 card-title"><a href="pages/concept-with-navigation.html">Concept page with curriculum navigation</a></h2>
+            <p class="card-text mb-0">
+              “The Future of the VA Industry” — a module&nbsp;2 concept with the navigation panel beside it,
+              showing read, current and unread activities, plus the full set of authored content blocks
+              (callouts, card grids, comparison columns). The “Need a Fast Track?” block and the Padlet
+              embed are removed.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <p class="mt-4 text-body-secondary">
+        See <code>README.md</code> for what is real, what was substituted, and how to regenerate.
+      </p>
+    </main>
+    <div id="google_translate_element" aria-hidden="true"></div>
+    <script>
+      (function () {
+        var languageSelect = document.getElementById("page-language");
+        var translationStatus = document.getElementById("translation-status");
+        var translateCombo;
+
+        window.googleTranslateElementInit = function () {
+          new google.translate.TranslateElement(
+            {
+              pageLanguage: "en",
+              includedLanguages: "am,en,om,ti,so,ar",
+              autoDisplay: false,
+            },
+            "google_translate_element"
+          );
+
+          var attempts = 0;
+          var comboTimer = window.setInterval(function () {
+            translateCombo = document.querySelector(".goog-te-combo");
+            attempts += 1;
+            if (translateCombo) {
+              window.clearInterval(comboTimer);
+              languageSelect.disabled = false;
+              return;
+            }
+            if (attempts >= 50) {
+              window.clearInterval(comboTimer);
+              translationStatus.textContent = "The translation service could not be initialized.";
+            }
+          }, 100);
+        };
+
+        languageSelect.addEventListener("change", function () {
+          translateCombo = translateCombo || document.querySelector(".goog-te-combo");
+          if (!translateCombo) {
+            translationStatus.textContent = "The translation service is not available. Please try again later.";
+            return;
+          }
+
+          translateCombo.value = languageSelect.value === "en" ? "" : languageSelect.value;
+          translateCombo.dispatchEvent(new Event("change", { bubbles: true }));
+          document.documentElement.lang = languageSelect.value;
+          document.documentElement.dir = languageSelect.value === "ar" ? "rtl" : "ltr";
+          translationStatus.textContent =
+            "Page language changed to " + languageSelect.options[languageSelect.selectedIndex].text + ".";
+        });
+      })();
+    </script>
+    <script
+      src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"
+      onerror="document.getElementById('translation-status').textContent = 'The translation service could not be loaded.'"
+    ></script>
+    <script src="assets/js/speech-config.js"></script>
+    <script src="assets/js/accessibility-chat.js"></script>
+  </body>
+</html>
